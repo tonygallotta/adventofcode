@@ -35,7 +35,6 @@ func part2(lines []string) {
 		var first = toInts(strings.Split(sections[0], "-"))
 		var second = toInts(strings.Split(sections[1], "-"))
 		if overlaps(first, second) || overlaps(second, first) {
-			fmt.Println("Overlap in ", line)
 			count += 1
 		}
 	}
