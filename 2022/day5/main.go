@@ -16,6 +16,14 @@ func main() {
 }
 
 func part1(lines []string) {
+	fmt.Println("Part 1: ", moveCrates(lines, true))
+}
+
+func part2(lines []string) {
+	fmt.Println("Part 2: ", moveCrates(lines, false))
+}
+
+func moveCrates(lines []string, isCreateMover9000 bool) string {
 	var stacks = make([][]string, 9)
 	for i, line := range lines {
 		if i < 8 {
@@ -37,7 +45,11 @@ func part1(lines []string) {
 			var toStackNum, _ = strconv.Atoi(instruction[5])
 			var fromStack = stacks[fromStackNum-1]
 			var toStack = stacks[toStackNum-1]
-			stacks[toStackNum-1] = append(toStack, reverse(fromStack[len(fromStack)-count:])...)
+			var cratesToMove = fromStack[len(fromStack)-count:]
+			if isCreateMover9000 {
+				cratesToMove = reverse(cratesToMove)
+			}
+			stacks[toStackNum-1] = append(toStack, cratesToMove...)
 			stacks[fromStackNum-1] = fromStack[:len(fromStack)-count]
 		}
 	}
@@ -47,12 +59,7 @@ func part1(lines []string) {
 			result = result + stack[len(stack)-1]
 		}
 	}
-	fmt.Println("Part 1: ", result)
-}
-
-func part2(lines []string) {
-	var count int
-	fmt.Println("Part 2: ", count)
+	return result
 }
 
 func reverse(src []string) []string {
