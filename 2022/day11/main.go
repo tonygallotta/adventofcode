@@ -12,7 +12,8 @@ type Monkey struct {
 	items     []uint64
 	operation func(old uint64) uint64
 	// Returns the monkey number to throw to
-	test func(worryLevel uint64) int
+	test    func(worryLevel uint64) int
+	divisor int
 }
 
 func (self *Monkey) inspect(itemNumber int) {
@@ -20,7 +21,7 @@ func (self *Monkey) inspect(itemNumber int) {
 }
 
 func main() {
-	data, _ := os.ReadFile("sample_input.txt")
+	data, _ := os.ReadFile("input.txt")
 	var fileAsString = string(data)
 	var lines = strings.Split(fileAsString, "\n")
 	part1(lines)
@@ -30,16 +31,14 @@ func main() {
 func part1(lines []string) {
 	var monkeys = []*Monkey{}
 	for i := 0; i < len(lines); i += 7 {
-		monkeys = append(monkeys, &Monkey{parseItems(lines[i+1]), parseOperation(lines[i+2]), parseTest(lines[i+3 : i+6])})
+		monkeys = append(monkeys, &Monkey{parseItems(lines[i+1]), parseOperation(lines[i+2]), parseTest(lines[i+3 : i+6]), parseDivisor(lines[i+3])})
 	}
 	var inspections = make([]int, len(monkeys))
 	for i := 0; i < 20; i++ {
 		for monkeyNum, monkey := range monkeys {
 			for _, item := range monkey.items {
-				// fmt.Println("Inspecting item with worry level ", item)
 				var worryLevel = monkey.operation(item) / 3
 				var throwTo = monkey.test(worryLevel)
-				// fmt.Println("Item with worry level ", worryLevel, " is thrown to monkey ", throwTo)
 				monkeys[throwTo].items = append(monkeys[throwTo].items, worryLevel)
 				monkey.items = monkey.items[1:]
 				inspections[monkeyNum] += 1
@@ -55,13 +54,17 @@ func part1(lines []string) {
 func part2(lines []string) {
 	var monkeys = []*Monkey{}
 	for i := 0; i < len(lines); i += 7 {
-		monkeys = append(monkeys, &Monkey{parseItems(lines[i+1]), parseOperation(lines[i+2]), parseTest(lines[i+3 : i+6])})
+		monkeys = append(monkeys, &Monkey{parseItems(lines[i+1]), parseOperation(lines[i+2]), parseTest(lines[i+3 : i+6]), parseDivisor(lines[i+3])})
 	}
 	var inspections = make([]int, len(monkeys))
+	var divisorProduct uint64 = 1
+	for _, monkey := range monkeys {
+		divisorProduct *= uint64(monkey.divisor)
+	}
 	for i := 0; i < 10_000; i++ {
 		for monkeyNum, monkey := range monkeys {
 			for _, item := range monkey.items {
-				var worryLevel = monkey.operation(item)
+				var worryLevel = monkey.operation(item) % divisorProduct
 				var throwTo = monkey.test(worryLevel)
 				monkeys[throwTo].items = append(monkeys[throwTo].items, worryLevel)
 				monkey.items = monkey.items[1:]
@@ -129,4 +132,9 @@ func parseOperands(first, second string, old uint64) (uint64, uint64) {
 		secondIntValue = uint64(tmp)
 	}
 	return firstIntValue, secondIntValue
+}
+
+func parseDivisor(line string) int {
+	var operand, _ = strconv.Atoi(strings.Split(strings.TrimSpace(line), " ")[3])
+	return operand
 }
