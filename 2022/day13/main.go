@@ -8,15 +8,6 @@ import (
 	"strings"
 )
 
-type ListOrInt struct {
-	listValue []ListOrInt
-	intValue  int
-}
-
-type Packet struct {
-	value []ListOrInt
-}
-
 func main() {
 	data, _ := os.ReadFile("input.txt")
 	var fileAsString = string(data)
