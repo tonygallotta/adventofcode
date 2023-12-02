@@ -34,6 +34,7 @@ func part1(lines []string) {
 				break
 			}
 		}
+		fmt.Printf("Line val %v", lineVal)
 		var calibrationValue, _ = strconv.Atoi(lineVal)
 		answer = answer + calibrationValue
 	}
