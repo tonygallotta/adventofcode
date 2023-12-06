@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 func main() {
@@ -13,7 +15,7 @@ func main() {
 	var fileAsString = string(data)
 	var lines = strings.Split(fileAsString, "\n")
 	part1(lines)
-	part2(lines)
+	part2(lines) // Sample answer = 46
 }
 
 type AlmanacMapFunction struct {
@@ -27,12 +29,33 @@ type AlmanacMap struct {
 	maps  []AlmanacMapFunction
 }
 
-func (a AlmanacMapFunction) HasMapping(num int) bool {
+type Range struct {
+	min int
+	max int
+}
+
+func (r1 Range) Overlaps(r2 Range) bool {
+	return (r1.min >= r2.min && r1.min < r2.max) || (r1.max >= r2.min && r1.min < r2.max)
+}
+
+func (a AlmanacMapFunction) HasSourceMapping(num int) bool {
 	var diff = num - a.source
 	return diff >= 0 && diff < a.length
 }
 
-func (a AlmanacMapFunction) MapValue(num int) int {
+func (a AlmanacMapFunction) HasDestOverlap(r Range) bool {
+	return a.DestRange().Overlaps(r)
+}
+
+func (a AlmanacMapFunction) DestRange() Range {
+	return Range{a.dest, a.dest + a.length - 1}
+}
+
+func (a AlmanacMapFunction) SourceRange() Range {
+	return Range{a.dest, a.dest + a.length - 1}
+}
+
+func (a AlmanacMapFunction) MapSourceValue(num int) int {
 	var diff = num - a.source
 	if diff >= 0 && diff < a.length {
 		return a.dest + diff
@@ -42,9 +65,9 @@ func (a AlmanacMapFunction) MapValue(num int) int {
 
 func (a AlmanacMap) MapValue(num int) int {
 	for _, mapFn := range a.maps {
-		if mapFn.HasMapping(num) {
+		if mapFn.HasSourceMapping(num) {
 			//fmt.Printf("%v has a mapping for %v\n", a.label, num)
-			return mapFn.MapValue(num)
+			return mapFn.MapSourceValue(num)
 		}
 	}
 	//fmt.Printf("%v does NOT have a mapping for %v\n", a.label, num)
@@ -67,20 +90,33 @@ func part1(lines []string) {
 func part2(lines []string) {
 	var answer = -1
 	var seeds, maps = ParseInputs(lines)
+	var seedRanges = []Range{}
 	for i := 0; i < len(seeds)-1; i += 2 {
-		// Well, there are way too many seeds to solve it this way. Maybe we can start with locations and work backward?
-		fmt.Printf("Testings seeds %v-%v\n", seeds[i], seeds[i]+seeds[i+1]-1)
-		var locationNumber = 0
-		for seed := seeds[i]; seed < seeds[i]+seeds[i+1]; seed++ {
-			locationNumber = seed
-			for _, m := range maps {
-				locationNumber = m.MapValue(locationNumber)
-			}
-			if locationNumber < answer || answer == -1 {
-				answer = locationNumber
-			}
+		seedRanges = append(seedRanges, Range{seeds[i], seeds[i] + seeds[i+1] - 1})
+	}
+	var mins = []int{}
+	var wg sync.WaitGroup
+	for i, s := range seedRanges {
+		wg.Add(1)
+		go func(r Range, rangeNum int) {
+			defer wg.Done()
+			fmt.Println("Checking seed range ", rangeNum)
+			var minForRange = MinInRange(r, maps)
+			mins = append(mins, minForRange)
+			fmt.Println("Min for seed range ", minForRange)
+		}(s, i)
+	}
+	wg.Wait()
+	answer = mins[0]
+	for _, m := range mins {
+		if m < answer {
+			answer = m
 		}
 	}
+	// 368703957 too high
+	// 2494335141
+	// 207836694
+	// 95461669
 	fmt.Println("Part 2: ", answer)
 }
 
@@ -97,6 +133,20 @@ func MapToInts(s []string) []int {
 		result = append(result, j)
 	}
 	return result
+}
+
+func MinInRange(s Range, maps []AlmanacMap) int {
+	var answer = math.MaxInt32
+	for seed := s.min; seed <= s.max; seed++ {
+		v := seed
+		for _, m := range maps {
+			v = m.MapValue(v)
+		}
+		if v < answer {
+			answer = v
+		}
+	}
+	return answer
 }
 
 func ParseInputs(lines []string) ([]int, []AlmanacMap) {
