@@ -103,7 +103,7 @@ func part2(lines []string) {
 			fmt.Println("Checking seed range ", rangeNum)
 			var minForRange = MinInRange(r, maps)
 			mins = append(mins, minForRange)
-			fmt.Println("Min for seed range ", minForRange)
+			fmt.Println("Min for seed range", r, minForRange)
 		}(s, i)
 	}
 	wg.Wait()
