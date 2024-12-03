@@ -1,6 +1,7 @@
 from common import read_input_as_int_arrays
 
-def check_is_safe(report, check_increasing):
+
+def check_is_safe(report: list[int], check_increasing: bool):
     for i in range(1, len(report)):
         prev_level = report[i - 1]
         current_level = report[i]
@@ -13,9 +14,10 @@ def check_is_safe(report, check_increasing):
             return False
     return True
 
+
 if __name__ == "__main__":
     reports = read_input_as_int_arrays(2)
-    answer = 0
+    answer: int = 0
     for r in range(len(reports)):
         report = reports[r]
         if check_is_safe(report, report[0] < report[1]):
