@@ -53,7 +53,7 @@ class Point:
         return set(filter(lambda p: p != self and p.in_bounds(x_max, y_max), possible_neighbors))
 
     def plus(self, offset: (int, int)):
-        return Point(self.x - offset[0], self.y - offset[1])
+        return Point(self.x + offset[0], self.y + offset[1])
 
     def difference(self, other) -> (int, int):
         return self.x - other.x, self.y - other.y
@@ -82,6 +82,9 @@ class Grid:
         if not point.in_bounds(self.x_max(), self.y_max()):
             return None
         return self.data[point.x][point.y]
+    
+    def set(self, point: Point, value):
+        self.data[point.x][point.y] = value
 
     def x_max(self):
         return len(self.data)
