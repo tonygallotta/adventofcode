@@ -53,6 +53,7 @@ def backtrack_dfs_solve(e: Equation, partial_solution: list[str], possible_opera
         for operator in possible_operators:
             if backtrack_dfs_solve(e, partial_solution + [operator], possible_operators):
                 return True
+    return False
 
 
 if __name__ == "__main__":
