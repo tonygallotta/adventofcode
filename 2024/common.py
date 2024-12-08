@@ -55,6 +55,9 @@ class Point:
     def plus(self, offset: (int, int)):
         return Point(self.x + offset[0], self.y + offset[1])
 
+    def minus(self, offset: (int, int)):
+        return Point(self.x - offset[0], self.y - offset[1])
+
     def difference(self, other) -> (int, int):
         return self.x - other.x, self.y - other.y
 
@@ -82,7 +85,7 @@ class Grid:
         if not point.in_bounds(self.x_max(), self.y_max()):
             return None
         return self.data[point.x][point.y]
-    
+
     def set(self, point: Point, value):
         self.data[point.x][point.y] = value
 
@@ -91,3 +94,13 @@ class Grid:
 
     def y_max(self):
         return len(self.data[0])
+
+    def print(self, print_fn) -> None:
+        for i in range(self.x_max()):
+            for j in range(self.y_max()):
+                point = Point(i, j)
+                if print_fn is None:
+                    print(self.get(point), end='')
+                else:
+                    print(print_fn(point), end='')
+            print('')
