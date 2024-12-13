@@ -19,9 +19,9 @@ def read_input_as_string_arrays(day, sample):
     return results
 
 
-def read_input_as_string_grid(day, sample):
+def read_input_as_string_grid(day, sample, sample_num=1):
     results = []
-    with open(get_file_name(day, sample)) as file:
+    with open(get_file_name(day, sample, sample_num)) as file:
         for line in file:
             values = line.strip()
             line_chars = []
@@ -39,8 +39,8 @@ def read_input_as_strings(day, sample):
     return results
 
 
-def get_file_name(day, sample):
-    return "input/day{}{}.txt".format(day, "_sample" if sample else "")
+def get_file_name(day, sample, sample_num=1):
+    return "input/day{}{}{}.txt".format(day, "_sample" if sample else "", sample_num if sample_num > 1 else "")
 
 
 @dataclass(frozen=True)  # make it hashable
@@ -49,8 +49,16 @@ class Point:
     y: int
 
     def neighbors(self, x_max: int, y_max: int) -> set:
-        possible_neighbors = [Point(self.x + x, self.y + y) for x in (-1, 0, 1) for y in (-1, 0, 1)]
-        return set(filter(lambda p: p != self and p.in_bounds(x_max, y_max), possible_neighbors))
+        return set(filter(lambda p: p != self and p.in_bounds(x_max, y_max), self.neighbors_unbounded()))
+
+    def neighbors_unbounded(self) -> set:
+        return set([Point(self.x + x, self.y + y) for x in (-1, 0, 1) for y in (-1, 0, 1)])
+
+    def neighbors_unbounded_cross(self) -> set:
+        return set([Point(self.x + x, self.y + y) for x, y in [(-1, 0), (0, -1), (0, 1), (1, 0)]])
+
+    def neighbors_cross(self, x_max: int, y_max: int) -> set:
+        return set(filter(lambda p: p != self and p.in_bounds(x_max, y_max), self.neighbors_unbounded_cross()))
 
     def plus(self, offset: (int, int)):
         return Point(self.x + offset[0], self.y + offset[1])
