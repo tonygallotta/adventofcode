@@ -72,6 +72,18 @@ class Point:
     def in_bounds(self, x_max, y_max):
         return 0 <= self.x < x_max and 0 <= self.y < y_max
 
+    def top(self):
+        return Point(self.x, self.y - 1)
+
+    def bottom(self):
+        return Point(self.x, self.y + 1)
+
+    def left(self):
+        return Point(self.x - 1, self.y)
+
+    def right(self):
+        return Point(self.x + 1, self.y)
+
     def top_left(self):
         return Point(self.x - 1, self.y - 1)
 
